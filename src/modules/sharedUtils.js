@@ -41,6 +41,13 @@ export {_dom_properties_ext}
 const _dom_properties_ext = [..._dom_properties]
 _dom_properties_ext.push('outerHTML', 'outerText')
 
+
+/**
+ * An extended list of dom properties to log when including input elements in a custom event.
+ */
+const _dom_properties_input_ext = [..._dom_properties_ext]
+_dom_properties_input_ext.push('value', 'valueAsDate', 'valueAsNumber', 'willValidate')
+
 /**
  * A function that computes the XPath of a given element
  * https://stackoverflow.com/questions/3454526/how-to-calculate-the-xpath-position-of-an-element-using-javascript

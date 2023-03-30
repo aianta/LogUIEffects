@@ -27,11 +27,27 @@ export default (function(root){
         //Get the root element
         let rootElement = browserEvent.composedPath().find(e=>e.localName === 'html')
 
+        //Get the ValidityState object
+        //https://developer.mozilla.org/en-US/docs/Web/API/ValidityState
+        let validityState = browserEvent.target.validity 
+
+
         let returnObject = {
             type: browserEvent.type,
             xpath: getElementTreeXPath(browserEvent.target),
             element: JSON.stringify(browserEvent.target, _dom_properties_ext), //The actual input element should include extended properties.
-            domSnapshot: JSON.stringify(rootElement, _root_dom_properties)
+            domSnapshot: JSON.stringify(rootElement, _root_dom_properties),
+            validity_badInput: validityState.badInput,
+            validity_customError: validityState.customError,
+            validity_patternMismatch: validityState.patternMismatch,
+            validity_rangeOverflow: validityState.rangeOverflow,
+            validity_rangeUnderflow: validityState.rangeUnderflow,
+            validity_stepMismatch: validityState.stepMismatch,
+            validity_tooLong: validityState.tooLong,
+            validity_tooShort: validityState.tooShort,
+            validity_typeMismatch: validityState.typeMismatch,
+            validity_valid: validityState.valid,
+            validity_valueMissing: validityState.valueMissing,
         }
 
         if(trackingConfig.hasOwnProperty('name')){
