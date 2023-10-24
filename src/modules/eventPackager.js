@@ -39,6 +39,23 @@ export default (function(root) {
         packageObject.eventType = 'customEvent';
         packageObject.eventDetails = eventDetails;
 
+        /**
+         * @author Alexandru Ianta
+         * For odo sight, when network events are captured as custom events, we want to make sure
+         * the network event timestamp is the timestamp being used as the eventTimestamp. 
+         * Ideally these would both be the same or very similar, but when something like
+         * a POST request is made just before the page unloads, LogUI will lose that event
+         * because it will unload from the page before the network request can be captured. 
+         * Odo-sight will send the network event to LogUI again once it is re-loaded on the 
+         * next page, but at this point sinificant amounts of time have passed. So to keep events
+         * ordered properly, for network request events, we overwrite timestamps.eventTimestamp 
+         * with the one provided in the eventDetails. 
+         * 
+         */
+        if(eventDetails.name === 'NETWORK_EVENT' && eventDetails.timeStamp !== undefined){
+            packageObject.timestamps.eventTimestamp = new Date(eventDetails.timeStamp)
+        }
+
         Dispatcher.sendObject(packageObject);
     }
 
