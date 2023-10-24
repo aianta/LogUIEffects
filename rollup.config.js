@@ -17,6 +17,10 @@ switch (process.env.DISPATCHER) {
         dispatcherImport = './modules/dispatchers/consoleDispatcher';
         dispatcherImportInPackager = './dispatchers/consoleDispatcher';
         break;
+    case 'odo-sight':
+        dispatcherImport = './modules/dispatchers/odosightDispatcher'
+        dispatcherImportInPackager = './dispatchers/odosightDispatcher'
+        break;
 }
 
 export default {
