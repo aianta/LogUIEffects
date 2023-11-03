@@ -51,6 +51,7 @@ export default (function(root) {
         _DOMProperties = new WeakMap();
         _public.CSSRules.init();
         _public.sessionData.init();
+
         return initState;
     };
 

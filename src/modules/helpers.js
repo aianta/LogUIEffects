@@ -16,6 +16,7 @@ export default (function(root) {
     _helpers.$$ = root.document.querySelectorAll.bind(root.document);
 
     _helpers.console = function(messageStr, currentState=null, isWarning=false) {
+
         let currentStateString = '';
         let consoleFunction = console.log;
 

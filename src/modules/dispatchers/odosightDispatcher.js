@@ -40,9 +40,11 @@ export default (function(root){
     _public.init = function(){
         _initWindowConnection();
         
+
+
         _isActive = true;
         
-        root.dispatchEvent(new Event('logUIStarted'));
+
         return true;
     };
 
@@ -84,8 +86,45 @@ export default (function(root){
         throw Error('You cannot send a message when LogUI is not active.')
     }
 
+    function handleSessionConfig(_sessionData){
+        Config.sessionData.setID(_sessionData.sessionID)
+        Config.sessionData.setTimestamps(new Date(_sessionData['sessionStartTimestamp']), new Date(_sessionData['libraryStartTimestamp']))
+
+        root.dispatchEvent(new Event('logUIStarted'))
+    }
+
     var _initWindowConnection = function(){
         _windowConnection = new WindowConnection('logui.bundle.js', 'main.js')
+
+
+        _windowConnection.on('DISPATCHER_CONNECTION_SUCCESS', function(request){
+            return new Promise((resolve,reject)=>{
+                handleSessionConfig(request.sessionData)
+                resolve('got session config details.')
+            })
+        })
+
+
+        _windowConnection.on('LOGUI_HANDSHAKE_SUCCESS', function(request){
+            return new Promise((resolve,reject)=>{
+                handleSessionConfig(request.sessionData)
+                resolve('got session config details.')
+            })
+        })
+
+        _windowConnection.on('LOGUI_CACHE_OVERFLOW', function(request){
+            return new Promise((resolve,reject)=>{
+                root.dispatchEvent(new Event('logUIShutdownRequest'))
+                resolve('dispatched DOM Event logUIShutdownRequest')
+
+            })
+        })
+
+        _windowConnection.send({
+            type: 'CONNECT_DISPATCHER',
+            authToken: Config.getConfigProperty('authorisationToken'),
+            endpoint: Config.getConfigProperty('endpoint')
+        })
     }
 
     return _public;

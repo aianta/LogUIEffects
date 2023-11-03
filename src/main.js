@@ -52,7 +52,7 @@ export default (function(root) {
             throw Error('The LogUI event handler controller component failed to initialise. Check console warnings to see what went wrong.');
         }
         
-        root.addEventListener('unload', _public.stop);
+        //root.addEventListener('unload', _public.stop);
     };
 
     _public.isActive = function() {
@@ -66,7 +66,7 @@ export default (function(root) {
             throw Error('LogUI may only be stopped if it is currently running.');
         }
 
-        root.removeEventListener('unload', _public.stop);
+        //root.removeEventListener('unload', _public.stop);
         root.removeEventListener('logUIShutdownRequest', _public.stop);
 
         // https://stackoverflow.com/questions/42304996/javascript-using-promises-on-websocket
