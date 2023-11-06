@@ -38,7 +38,15 @@ export default (function(root){
     _public.dispatcherType = 'odo-sight';
 
     _public.init = function(){
-        _initWindowConnection();
+        if (!_isActive){
+            root.addEventListener('message', handleMessage)
+    
+            root.postMessage({
+                origin: 'logui.bundle.js',
+                type: 'GET_SESSION_INFO'
+            })
+        }
+
         
 
 
@@ -48,7 +56,26 @@ export default (function(root){
         return true;
     };
 
+
+    function handleMessage(event){
+        if(event.source === root &&
+            event?.data?.origin === 'main.js'){
+                console.log(`odosightDispatcher got ${event.data.type} message.`)
+                switch(event.data.type){
+                    case "LOGUI_CACHE_OVERFLOW":
+                        root.dispatchEvent(new Event('logUIShutdownRequest'))
+                        break;
+                    case "SESSION_INFO":
+                        console.log(`got session info! ${JSON.stringify(event.data.sessionData,null,4)}`)
+                        handleSessionConfig(event.data.sessionData)
+                        break;
+                }
+            }
+    }
+
     _public.stop = async function(){
+
+        root.removeEventListener('message', handleMessage)
 
         _isActive = false;
 
@@ -81,33 +108,14 @@ export default (function(root){
     function handleSessionConfig(_sessionData){
         Config.sessionData.setID(_sessionData.sessionID)
         Config.sessionData.setTimestamps(new Date(_sessionData['sessionStartTimestamp']), new Date(_sessionData['libraryStartTimestamp']))
-
-        root.dispatchEvent(new Event('logUIStarted'))
-    }
-
-    var _initWindowConnection = function(){
-
-        root.addEventListener('message', function(event){
-            if(event.source === this.window &&
-                event?.data?.origin === 'main.js'){
-                    console.log(`odosightDispatcher got ${event.data.type} message.`)
-                    switch(event.data.type){
-                        case "LOGUI_CACHE_OVERFLOW":
-                            root.dispatchEvent(new Event('logUIShutdownRequest'))
-                            break;
-                        case "SESSION_INFO":
-                            handleSessionConfig(event.data.sessionData)
-                            break;
-                    }
-                }
-        })
-
-        root.postMessage({
-            origin: 'logui.bundle.js',
-            type: 'GET_SESSION_INFO'
-        })
+        console.log('sessionData')
+        console.log(_sessionData)
+        if(_sessionData.fresh){
+            root.dispatchEvent(new Event('logUIStarted'))
+        }
 
     }
+
 
     return _public;
 
