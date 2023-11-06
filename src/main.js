@@ -16,6 +16,8 @@ export default (function(root) {
 
     _public.Config = Config;
 
+    root.addEventListener('message', handleWindowMessages)
+
     /* API calls */
     _public.init = async function(suppliedConfigObject) {
         root.addEventListener('logUIShutdownRequest', _public.stop);
@@ -54,6 +56,22 @@ export default (function(root) {
         
         //root.addEventListener('unload', _public.stop);
     };
+
+    function handleWindowMessages(event){
+        if(event.source === window &&
+            event?.data?.origin === 'main.js'){
+                console.log(`Got ${event.data.type} msg from 'main.js'`)
+                switch(event.data.type){
+                    case 'START_LOGUI':
+                        _public.init(event.data.config)
+                        break;
+                    case 'STOP_LOGUI':
+                        _public.stop()
+                        break;
+                }
+
+            }
+    }
 
     _public.isActive = function() {
         return (

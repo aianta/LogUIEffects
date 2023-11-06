@@ -65,19 +65,11 @@ export default (function(root){
             
             let data = JSON.parse(JSON.stringify(objectToSend))
 
-
-            _windowConnection.send(
-                {
-                    type: 'LOGUI_EVENT',
-                    payload: data
-                },
-                function(response){
-                    console.log('Event dispatch acknowledged by odo-sight.')
-                },
-                function(error){
-                    console.error('Error dispatching event to odo-sight!', JSON.stringify(error, null, 4))
-                }
-            )
+            window.postMessage({
+                origin: 'logui.bundle.js',
+                type: 'LOGUI_EVENT',
+                payload: data
+            })
 
             return;
 
@@ -94,37 +86,27 @@ export default (function(root){
     }
 
     var _initWindowConnection = function(){
-        _windowConnection = new WindowConnection('logui.bundle.js', 'main.js')
 
-
-        _windowConnection.on('DISPATCHER_CONNECTION_SUCCESS', function(request){
-            return new Promise((resolve,reject)=>{
-                handleSessionConfig(request.sessionData)
-                resolve('got session config details.')
-            })
+        root.addEventListener('message', function(event){
+            if(event.source === this.window &&
+                event?.data?.origin === 'main.js'){
+                    console.log(`odosightDispatcher got ${event.data.type} message.`)
+                    switch(event.data.type){
+                        case "LOGUI_CACHE_OVERFLOW":
+                            root.dispatchEvent(new Event('logUIShutdownRequest'))
+                            break;
+                        case "SESSION_INFO":
+                            handleSessionConfig(event.data.sessionData)
+                            break;
+                    }
+                }
         })
 
-
-        _windowConnection.on('LOGUI_HANDSHAKE_SUCCESS', function(request){
-            return new Promise((resolve,reject)=>{
-                handleSessionConfig(request.sessionData)
-                resolve('got session config details.')
-            })
+        root.postMessage({
+            origin: 'logui.bundle.js',
+            type: 'GET_SESSION_INFO'
         })
 
-        _windowConnection.on('LOGUI_CACHE_OVERFLOW', function(request){
-            return new Promise((resolve,reject)=>{
-                root.dispatchEvent(new Event('logUIShutdownRequest'))
-                resolve('dispatched DOM Event logUIShutdownRequest')
-
-            })
-        })
-
-        _windowConnection.send({
-            type: 'CONNECT_DISPATCHER',
-            authToken: Config.getConfigProperty('authorisationToken'),
-            endpoint: Config.getConfigProperty('endpoint')
-        })
     }
 
     return _public;
