@@ -23,6 +23,29 @@ export default (function(root){
         return
     }
 
+    /**
+     * Returns a filtered snapshot of the DOM 
+     */
+        const captureDOMSnapshot = function(){
+            const fullHtml = document.documentElement.outerHTML
+            const scriptRegex = /<script[\s\S]*?>[\s\S]*?<\/script>/gi //https://stackoverflow.com/questions/16585635/how-to-find-script-tag-from-the-string-with-javascript-regular-expression
+            const noScripts = fullHtml.replaceAll(scriptRegex, "") //Clear all scripts.
+            const xmlCharacterDataRegex = /<!\[CDATA[\s\S]*\]\]>/gi 
+            const noXMLCDATA = noScripts.replaceAll(xmlCharacterDataRegex, "") //Clear all XML character data
+            const styleRegex = /<style[\s\S]*?>[\s\S]*?<\/style>/gi
+            const noStyle = noXMLCDATA.replaceAll(styleRegex, "") //Clear all css styles
+            const svgPathsRegex = /<path[\s\S]*?>[\s\S]*?<\/path>/gi
+            const noSvgPaths = noStyle.replaceAll(svgPathsRegex, "") //Clear all paths inside SVGs
+    
+            let result = {
+                outerHTML: noSvgPaths, 
+                outerText: document.documentElement.outerText
+            }
+    
+            return JSON.stringify(result)
+    
+        }
+
     // Handle the click event
     _handler.logUIEventCallback = function(eventContext, browserEvent, trackingConfig){
         
@@ -45,7 +68,7 @@ export default (function(root){
             type: browserEvent.type,
             xpath: getElementTreeXPath(browserEvent.target),
             element: JSON.stringify(eventPath[0], _dom_properties_ext),
-            domSnapshot: JSON.stringify(rootElement, _root_dom_properties) ,
+            domSnapshot: captureDOMSnapshot(),
         };
         
         if(trackingConfig.hasOwnProperty('name')){
