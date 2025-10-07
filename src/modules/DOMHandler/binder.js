@@ -32,7 +32,10 @@ export default (function(root) {
         let elementDOMProperties = Config.DOMProperties.get(element);
 
         for (let eventName of elementDOMProperties.getEventList()) {
-            element.addEventListener(eventName, EventCallbackHandler.logUIEventCallback);
+
+            element.addEventListener(eventName, EventCallbackHandler.logUIEventCallback, true);
+
+            
         }
     };
 

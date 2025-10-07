@@ -17,6 +17,8 @@ export default (function(root) {
     var _public = {};
 
     _public.logUIEventCallback = function(browserEvent) {
+        browserEvent._eventTime = performance.now()
+        console.log('EVENT TIME: ', browserEvent.timeStamp)
         let elementDOMProperties = Config.DOMProperties.get(browserEvent.currentTarget);
 
         // console.log("Event happened");

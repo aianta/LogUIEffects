@@ -47,7 +47,7 @@ export default (function(root) {
          * a POST request is made just before the page unloads, LogUI will lose that event
          * because it will unload from the page before the network request can be captured. 
          * Odo-sight will send the network event to LogUI again once it is re-loaded on the 
-         * next page, but at this point sinificant amounts of time have passed. So to keep events
+         * next page, but at this point significant amounts of time have passed. So to keep events
          * ordered properly, for network request events, we overwrite timestamps.eventTimestamp 
          * with the one provided in the eventDetails. 
          * 
