@@ -18,6 +18,8 @@ export default (function(root) {
 
     root.addEventListener('message', handleWindowMessages)
 
+    console.log(`Hello from LogUI inside ${root.location}!`)
+
     /* API calls */
     _public.init = async function(suppliedConfigObject) {
         root.addEventListener('logUIShutdownRequest', _public.stop);
@@ -54,8 +56,72 @@ export default (function(root) {
             throw Error('The LogUI event handler controller component failed to initialise. Check console warnings to see what went wrong.');
         }
         
+        document.addEventListener('loguiEvent', function(event){
+            console.log("Relaying event from child iframe! ")
+            console.log(event)
+            console.log(event.detail)
+            Dispatcher.sendObject(event.detail)
+        })
+
         //root.addEventListener('unload', _public.stop);
+
+        //Init any LogUI instances inside same-origin iframes. 
+        // for (let frame of document.querySelectorAll('iframe')){
+        //     if (frame.contentWindow.LogUI){ //If there is a LogUI instance defined in this iframe
+        //         console.log("Attempting to init LogUI inside iframe")
+        //         console.log(frame.contentWindow.LogUI)
+        //         //Initalize it with the config object that was given to us.
+        //         frame.contentWindow.LogUI.iframeInit(suppliedConfigObject)
+
+        //     }
+        // }
+
+
     };
+
+    /* Author: Alex Ianta
+    * Date: October 10, 2025
+    * Adding support for capturing interaction events inside iframes of the parent document.
+    * 
+    * Inside an iframe we want to bind to elements and events using the same configuration as LogUI on the parent document.
+    * However, the eventhandlers here will not invoke a dispatcher but rather simply report their events 
+    * to LogUI in the parent document. 
+    * 
+    * In effect, there is no direct LogUI stop/start inside the iframe, that logic is invoked from the parent window LogUI.
+    */
+   _public.iframeInit = async function(suppliedConfigObject){
+        suppliedConfigObject = JSON.parse(suppliedConfigObject) //Pass config via string to avoid permissionn issues?
+        console.log("Initalizing LogUI inside IFrame!")
+
+        if (!suppliedConfigObject){
+            throw Error('LogUI requires a configuration object to be passed to the init() function.')
+        }
+
+        if(!Config.init(suppliedConfigObject)){
+            throw Error('The LogUI configuration component failed to initialise. Check console warnings to see what went wrong.');
+        }
+
+        if (!MetadataHandler.init()) {
+            throw Error('The LogUI metadata handler component failed to initialise. Check console warnings to see what went wrong.');
+        }
+
+        if (!SpecificFrameworkEvents.init()) {
+            throw Error('The LogUI events component failed to initialise. Check console warnings to see what went wrong.');
+        }
+
+        if (!DOMHandler.init()) {
+            throw Error('The LogUI DOMHandler component failed to initialise. Check console warnings to see what went wrong.');
+        }
+
+        if (!EventHandlerController.init()) {
+            throw Error('The LogUI event handler controller component failed to initialise. Check console warnings to see what went wrong.');
+        }
+
+        Dispatcher.iframeInit()
+
+        console.log("Finished iframeInit!")
+   }
+
 
     function handleWindowMessages(event){
         if(event.source === window &&

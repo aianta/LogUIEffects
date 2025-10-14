@@ -39,7 +39,9 @@ export const _dom_properties = [
 export {_dom_properties_ext} 
 
 const _dom_properties_ext = [..._dom_properties]
-_dom_properties_ext.push('outerHTML', 'outerText')
+_dom_properties_ext.push('outerHTML', 'outerText', 
+    'checked', 'role', 'disabled', 'placeholder', 'required', 'type', 'name', 'selected', 'label'
+)
 
 
 /**

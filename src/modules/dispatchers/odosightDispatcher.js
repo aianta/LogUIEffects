@@ -31,11 +31,20 @@ export default (function(root){
 
     var _public = {};
     var _isActive = false;
+    var _isInIframe = false;
     var _windowConnection = null;
     var _libraryLoadTimestamp = null;  // The time at which the dispatcher loads -- for measuring the beginning of a session more accurately.
 
 
     _public.dispatcherType = 'odo-sight';
+
+    _public.iframeInit = function(){
+        _isInIframe = true
+    }
+
+    _public.isInIfrmae = function(){
+        return _isInIframe
+    }
 
     _public.init = function(){
         if (!_isActive){
@@ -100,7 +109,16 @@ export default (function(root){
 
             return;
 
+        }else if (_isInIframe){
+            var event = new CustomEvent('loguiEvent', {detail:JSON.parse(JSON.stringify(objectToSend))})
+            root.parent.document.dispatchEvent(event)
+            console.log("Dispatched event from iframe")
+
+            return;
+            
         }
+
+        console.log(`isActive: ${_isActive} isInIframe: ${_isInIframe}`)
 
         throw Error('You cannot send a message when LogUI is not active.')
     }

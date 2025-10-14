@@ -60,6 +60,7 @@ export default (function(root){
             xpath: getElementTreeXPath(browserEvent.target),
             element: JSON.stringify(browserEvent.target, _dom_properties_ext), //The actual input element should include extended properties.
             domSnapshot: captureDOMSnapshot(),
+            checked: browserEvent.target.checked,
             validity_badInput: validityState.badInput,
             validity_customError: validityState.customError,
             validity_patternMismatch: validityState.patternMismatch,
@@ -76,6 +77,22 @@ export default (function(root){
         if(trackingConfig.hasOwnProperty('name')){
             returnObject.name = trackingConfig.name
         }
+
+        // Grab other inputs with the same name for radio buttons
+        if(browserEvent.target.type == "radio"){
+            let options = []
+            console.log(`using querySelectior: input[type='radio'][name='${browserEvent.target.name}']`)
+            Array.from(document.querySelectorAll(`input[type='radio'][name='${browserEvent.target.name}']`)).forEach(e=>{
+                console.log('Got related element!')
+                options.push({
+                    xpath: getElementTreeXPath(e),
+                    element: JSON.stringify(e, _dom_properties_ext),
+                    checked: e.checked
+                })
+            })
+            returnObject.relatedElements = options
+        }
+
 
         return returnObject;
 
