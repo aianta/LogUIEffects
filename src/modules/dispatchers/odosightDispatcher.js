@@ -18,6 +18,7 @@ import Helpers from '../helpers'
 import Defaults from '../defaults'
 import RequiredFeatures from '../required'
 import ValidationSchemas from '../validationSchemas'
+import { getElementTreeXPath } from '../sharedUtils'
 
 Defaults.dispatcher = {
     endpoint: null,
@@ -110,8 +111,21 @@ export default (function(root){
             return;
 
         }else if (_isInIframe){
+
+            //Resolve element xpath
+            const iframeXpath = getElementTreeXPath(root.frameElement)
+            const interiorElementXpath = getXpathField(objectToSend)
+            const mergedIframeXpath = iframeXpath + interiorElementXpath
+            setXpathField(objectToSend, mergedIframeXpath)
+
+            console.log(`Xpath of the iframe: ${iframeXpath}`)
+            console.log(`Interior Element xpath: ${interiorElementXpath}`)
+            console.log(`mergedIframeXpath: ${mergedIframeXpath}`)
+
             var event = new CustomEvent('loguiEvent', {detail:JSON.parse(JSON.stringify(objectToSend))})
             root.parent.document.dispatchEvent(event)
+
+            
             console.log("Dispatched event from iframe")
 
             return;
@@ -121,6 +135,48 @@ export default (function(root){
         console.log(`isActive: ${_isActive} isInIframe: ${_isInIframe}`)
 
         throw Error('You cannot send a message when LogUI is not active.')
+    }
+
+    function updateIframeXpath(eventObject){
+
+        const currXpath = getXpathField(eventObject)
+
+
+
+
+    }
+
+    /**
+     * Given an event object, look through its keys recursively for an xpath. 
+     * @param {*} eventObject 
+     */
+    function getXpathField(eventObject){
+        for (const [key, value] of Object.entries(eventObject)){
+            if (key === 'xpath'){
+                return value
+            }
+
+            /**
+             * https://stackoverflow.com/questions/8511281/check-if-a-value-is-an-object-in-javascript
+             */
+            if (typeof value === 'object' && !Array.isArray(value) && value !== null){
+                return getXpathField(value)
+            }
+        }
+
+        return undefined
+    }
+
+    function setXpathField(eventObject, newXpath){
+        for(const [key,value] of Object.entries(eventObject)){
+            if (key === 'xpath'){
+                eventObject[key] = newXpath
+            }
+
+            if(typeof value === 'object' && !Array.isArray(value) && value !== null){
+                setXpathField(value, newXpath)
+            }
+        }
     }
 
     function handleSessionConfig(_sessionData){
