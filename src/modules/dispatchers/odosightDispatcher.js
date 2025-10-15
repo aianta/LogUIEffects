@@ -137,14 +137,6 @@ export default (function(root){
         throw Error('You cannot send a message when LogUI is not active.')
     }
 
-    function updateIframeXpath(eventObject){
-
-        const currXpath = getXpathField(eventObject)
-
-
-
-
-    }
 
     /**
      * Given an event object, look through its keys recursively for an xpath. 
