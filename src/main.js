@@ -65,16 +65,6 @@ export default (function(root) {
 
         //root.addEventListener('unload', _public.stop);
 
-        //Init any LogUI instances inside same-origin iframes. 
-        // for (let frame of document.querySelectorAll('iframe')){
-        //     if (frame.contentWindow.LogUI){ //If there is a LogUI instance defined in this iframe
-        //         console.log("Attempting to init LogUI inside iframe")
-        //         console.log(frame.contentWindow.LogUI)
-        //         //Initalize it with the config object that was given to us.
-        //         frame.contentWindow.LogUI.iframeInit(suppliedConfigObject)
-
-        //     }
-        // }
 
 
     };
@@ -129,9 +119,13 @@ export default (function(root) {
                 console.log(`Got ${event.data.type} msg from 'main.js'`)
                 switch(event.data.type){
                     case 'START_LOGUI':
+
+                        console.log(`Starting LogUI, Dispatcher.isInIframe: ${Dispatcher.isInIframe()}`)
                         _public.init(event.data.config)
+                        
                         break;
                     case 'STOP_LOGUI':
+                        console.log(`Stopping LogUI, Dispatcher.isInIframe: ${Dispatcher.isInIframe()}`)
                         _public.stop()
                         break;
                 }

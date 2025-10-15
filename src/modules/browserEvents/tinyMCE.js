@@ -11,7 +11,6 @@ export default(function(root){
         // Detect presense of TinyMCE 
         if (typeof tinymce != "undefined"){
             console.log("Detected TinyMCE, instrumenting...")
-
             // Attach event handlers to all available editors.
             tinymce.editors.forEach(editor=>editor.on('input', event=>handleTinyMCEInput(event, editor)))
         }
@@ -51,7 +50,8 @@ export default(function(root){
 
     var handleTinyMCEInput = function (event, editor){
         //Package and send object
-        //TODO: need to get the editor id in here. 
+
+        const iframeXpath = getElementTreeXPath(editor.getContentAreaContainer().children[0])
 
         console.log("tinyMCE Event Handler Invoked!")
 
@@ -60,9 +60,10 @@ export default(function(root){
             source: 'tinyMCE',
             editorId: editor.id,
             inputType: event.inputType,
-            xpath: getElementTreeXPath(editor.contentAreaContainer), 
+            xpath: iframeXpath, 
             domSnapshot: captureDOMSnapshot(),
-            value: event.data
+            value: event.data,
+            editorContent: editor.getContent({format: 'text'})
         }
 
         EventPackager.packageCustomEvent(eventData)

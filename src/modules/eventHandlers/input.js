@@ -78,6 +78,11 @@ export default (function(root){
             returnObject.name = trackingConfig.name
         }
 
+        //Include the type of the target input element, eg: 'checkbox'
+        if (browserEvent?.target?.type !== undefined){
+            returnObject.elementType = browserEvent.target.type
+        }
+
         // Grab other inputs with the same name for radio buttons
         if(browserEvent.target.type == "radio"){
             let options = []
