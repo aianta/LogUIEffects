@@ -5,6 +5,7 @@ import EventPackager from './modules/eventPackager';
 import MetadataHandler from './modules/metadataHandler';
 import SpecificFrameworkEvents from './modules/specificFrameworkEvents';
 import EventHandlerController from './modules/eventHandlerController';
+import TinyMCEHandler from './modules/tinyMCE'
 
 export default (function(root) {
     var _public = {};
@@ -63,6 +64,8 @@ export default (function(root) {
             Dispatcher.sendObject(event.detail)
         })
 
+        TinyMCEHandler.init()
+
         //root.addEventListener('unload', _public.stop);
 
 
@@ -120,12 +123,12 @@ export default (function(root) {
                 switch(event.data.type){
                     case 'START_LOGUI':
 
-                        console.log(`Starting LogUI, Dispatcher.isInIframe: ${Dispatcher.isInIframe()}`)
+                        console.log(`Starting LogUI, Dispatcher.isInIframe: ${Dispatcher.isInIframe?Dispatcher.isInIframe():'undefined'}`)
                         _public.init(event.data.config)
                         
                         break;
                     case 'STOP_LOGUI':
-                        console.log(`Stopping LogUI, Dispatcher.isInIframe: ${Dispatcher.isInIframe()}`)
+                        console.log(`Stopping LogUI, Dispatcher.isInIframe: ${Dispatcher.isInIframe?Dispatcher.isInIframe():'undefined'}`)
                         _public.stop()
                         break;
                 }
@@ -153,6 +156,7 @@ export default (function(root) {
         SpecificFrameworkEvents.stop();
         EventPackager.stop();
         MetadataHandler.stop();
+        TinyMCEHandler.stop();
         await Dispatcher.stop();
         Config.reset();
         root.dispatchEvent(new Event('logUIStopped'));
@@ -187,6 +191,16 @@ export default (function(root) {
 
         Config.sessionData.clearSessionIDKey();
     };
+
+    //Setup TinyMCE event capturing
+    root.addEventListener('load', ()=>{
+        
+        if (_public.isActive()){
+            TinyMCEHandler.init()
+        }
+    })
+
+    
 
     return _public;
 })(window);

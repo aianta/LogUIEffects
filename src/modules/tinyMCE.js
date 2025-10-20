@@ -1,6 +1,13 @@
+/*
+    Custom LogUI Event Handler
 
-import EventPackager from './../eventPackager'
-import { getElementTreeXPath } from '../sharedUtils';
+    Captures input interaction events from tinyMCE components on the page. 
+
+    @author: Alex Ianta
+    @date: 2025-10-20
+*/
+import EventPackager from './eventPackager'
+import { _dom_properties_ext, getElementTreeXPath } from './sharedUtils';
 
 export default(function(root){
 
@@ -11,8 +18,18 @@ export default(function(root){
         // Detect presense of TinyMCE 
         if (typeof tinymce != "undefined"){
             console.log("Detected TinyMCE, instrumenting...")
+
+            //Attach event handlers to any editors that will be created for this instance of tinymce
+            tinymce.on('AddEditor', (event)=>{
+                console.log(`Instrumented tinyMCE editor with id: ${event.editor.id}`)
+                event.editor.on('input', inputEvent=>handleTinyMCEInput(inputEvent, event.editor))
+            })
+
             // Attach event handlers to all available editors.
-            tinymce.editors.forEach(editor=>editor.on('input', event=>handleTinyMCEInput(event, editor)))
+            tinymce.editors.forEach(editor=>{
+                console.log(`Instrumented tinyMCE editor with id: ${editor.id}`)
+                editor.on('input', event=>handleTinyMCEInput(event, editor))
+            })
         }
 
     }
@@ -20,6 +37,11 @@ export default(function(root){
     _handler.stop = function(){
         if (typeof tinymce != "undefined"){
             console.log("Unregistering tinyMCE listeners")
+
+            tinymce.off('AddEditor', (event)=>{
+                console.log(`Instrumented tinyMCE editor with id: ${event.editor.id}`)
+                event.editor.on('input', inputEvent=>handleTinyMCEInput(inputEvent, event.editor))
+            })
 
             // Unregister event handlers on all available editors. 
             tinymce.editors.forEach(editor=>editor.off('input', event=>handleTinyMCEInput(event, editor)))
@@ -59,6 +81,7 @@ export default(function(root){
             name: 'INPUT_CHANGE',
             source: 'tinyMCE',
             editorId: editor.id,
+            element: JSON.stringify(editor.getContentAreaContainer(), _dom_properties_ext),
             inputType: event.inputType,
             xpath: iframeXpath, 
             domSnapshot: captureDOMSnapshot(),
