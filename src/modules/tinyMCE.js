@@ -23,12 +23,14 @@ export default(function(root){
             tinymce.on('AddEditor', (event)=>{
                 console.log(`Instrumented tinyMCE editor with id: ${event.editor.id}`)
                 event.editor.on('input', inputEvent=>handleTinyMCEInput(inputEvent, event.editor))
+                event.editor.on('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, event.editor))
             })
 
             // Attach event handlers to all available editors.
             tinymce.editors.forEach(editor=>{
                 console.log(`Instrumented tinyMCE editor with id: ${editor.id}`)
                 editor.on('input', event=>handleTinyMCEInput(event, editor))
+                editor.on('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, editor))
             })
         }
 
@@ -40,11 +42,15 @@ export default(function(root){
 
             tinymce.off('AddEditor', (event)=>{
                 console.log(`Instrumented tinyMCE editor with id: ${event.editor.id}`)
-                event.editor.on('input', inputEvent=>handleTinyMCEInput(inputEvent, event.editor))
+                event.editor.off('input', inputEvent=>handleTinyMCEInput(inputEvent, event.editor))
+                event.editor.off('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, event.editor))
             })
 
             // Unregister event handlers on all available editors. 
-            tinymce.editors.forEach(editor=>editor.off('input', event=>handleTinyMCEInput(event, editor)))
+            tinymce.editors.forEach(editor=>{
+                editor.off('input', event=>handleTinyMCEInput(event, editor))
+                editor.off('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, editor))
+            })
 
 
         }
@@ -82,10 +88,10 @@ export default(function(root){
             source: 'tinyMCE',
             editorId: editor.id,
             element: JSON.stringify(editor.getContentAreaContainer(), _dom_properties_ext),
-            inputType: event.inputType,
+            inputType: event.inputType !== undefined?event.inputType:'insertText',
             xpath: iframeXpath, 
             domSnapshot: captureDOMSnapshot(),
-            value: event.data,
+            value: event.data !== undefined?event.data:event.content,
             editorContent: editor.getContent({format: 'text'})
         }
 
