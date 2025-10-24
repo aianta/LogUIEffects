@@ -95,7 +95,16 @@ export default(function(root){
             editorContent: editor.getContent({format: 'text'})
         }
 
-        EventPackager.packageCustomEvent(eventData)
+        //Don't fire the event if the value/editor content is empty.
+        //TODO: Conceivably, this would prevent us from capturing interactions where SetContent is used to 'clear' the text box. 
+        //Will have to think of ways to account for this, possibly by only capturing SetContent during OdoBot's execution mode?
+        //Anyways, for now, let's just clean it up.
+        
+        if (eventData.editorContent){
+            EventPackager.packageCustomEvent(eventData)
+        }
+
+        
     }
 
 
