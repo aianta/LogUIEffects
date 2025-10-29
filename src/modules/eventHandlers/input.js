@@ -91,11 +91,14 @@ export default (function(root){
                 console.log('Got related element!')
                 options.push({
                     xpath: getElementTreeXPath(e),
-                    element: JSON.stringify(e, _dom_properties_ext),
-                    checked: e.checked
+                    element: JSON.parse(JSON.stringify(e, _dom_properties_ext)),
+                    checked: e.checked,
+                    value: e.value,
+                    html: e.outerHTML
                 })
             })
-            returnObject.relatedElements = options
+            returnObject.radioGroup = browserEvent.target.name
+            returnObject.relatedElements = JSON.stringify(options)
         }
 
 
