@@ -20,6 +20,7 @@ const LOGUI_SESSION_ID_KEYNAME = 'logUI-sessionIDKey';
 export default (function(root) {
     var _public = {};
     var _initTimestamp = null;
+    var _odoSettings = {};
 
     var _sessionData = null;
     
@@ -63,6 +64,10 @@ export default (function(root) {
         _trackingConfig = suppliedConfigObject.trackingConfiguration;
         _browserEvents = suppliedConfigObject.browserEvents;
 
+        if(suppliedConfigObject.odoSettings !== undefined){
+            _odoSettings = suppliedConfigObject.odoSettings
+        }
+
         return true;
     };
 
@@ -74,6 +79,7 @@ export default (function(root) {
         _applicationSpecificData = {};
         _trackingConfig = {};
         _browserEvents = {};
+        _odoSettings = {};
 
         _public.CSSRules.reset();
     };
@@ -147,6 +153,12 @@ export default (function(root) {
     // _public.getApplicationSpecificData = function() {
     //     return _applicationSpecificData;
     // };
+
+    _public.odoSettings = {
+        get: function(){
+            return _odoSettings;
+        }
+    }
 
     _public.applicationSpecificData = {
         get: function() {

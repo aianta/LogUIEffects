@@ -7,6 +7,7 @@
     @date: 2025-10-20
 */
 import EventPackager from './eventPackager'
+import Config from './config'
 import { _dom_properties_ext, getElementTreeXPath } from './sharedUtils';
 
 export default(function(root){
@@ -19,18 +20,29 @@ export default(function(root){
         if (typeof tinymce != "undefined"){
             console.log("Detected TinyMCE, instrumenting...")
 
+            let odoSettings = Config.odoSettings.get()
+
             //Attach event handlers to any editors that will be created for this instance of tinymce
             tinymce.on('AddEditor', (event)=>{
                 console.log(`Instrumented tinyMCE editor with id: ${event.editor.id}`)
                 event.editor.on('input', inputEvent=>handleTinyMCEInput(inputEvent, event.editor))
-                event.editor.on('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, event.editor))
+
+                if(odoSettings.captureSetContent){
+                    event.editor.on('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, event.editor))
+                }
+
+                
             })
 
             // Attach event handlers to all available editors.
             tinymce.editors.forEach(editor=>{
                 console.log(`Instrumented tinyMCE editor with id: ${editor.id}`)
                 editor.on('input', event=>handleTinyMCEInput(event, editor))
-                editor.on('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, editor))
+
+                if(odoSettings.captureSetContent){
+                    editor.on('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, editor))
+                }
+                
             })
         }
 
@@ -40,16 +52,24 @@ export default(function(root){
         if (typeof tinymce != "undefined"){
             console.log("Unregistering tinyMCE listeners")
 
+            let odoSettings = Config.odoSettings.get()
+
             tinymce.off('AddEditor', (event)=>{
                 console.log(`Instrumented tinyMCE editor with id: ${event.editor.id}`)
                 event.editor.off('input', inputEvent=>handleTinyMCEInput(inputEvent, event.editor))
-                event.editor.off('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, event.editor))
+
+                if(odoSettings.captureSetContent){
+                    event.editor.off('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, event.editor))
+                }
             })
 
             // Unregister event handlers on all available editors. 
             tinymce.editors.forEach(editor=>{
                 editor.off('input', event=>handleTinyMCEInput(event, editor))
-                editor.off('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, editor))
+
+                if(odoSettings.captureSetContent){
+                    editor.off('SetContent', contentEvent=>handleTinyMCEInput(contentEvent, editor))
+                }
             })
 
 
