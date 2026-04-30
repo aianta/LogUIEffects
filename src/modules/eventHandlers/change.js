@@ -60,13 +60,15 @@ export default (function(root){
             for(let child of browserEvent.target.children){
                 options.push({
                     xpath: getElementTreeXPath(child),
-                    element: JSON.stringify(child, _dom_properties_ext)
+                    element: JSON.parse(JSON.stringify(child, _dom_properties_ext))
                 })
             }
-            returnObject.options = options
+            returnObject.options = JSON.stringify(options)
         }
 
-
+        if(trackingConfig.hasOwnProperty('name')){
+            returnObject.name = trackingConfig.name;
+        }
         
 
         return returnObject;
