@@ -30,6 +30,20 @@ export default (function(root) {
         packageObject.eventDetails = eventDetails;
         packageObject.metadata = MetadataHandler.getMetadata(element, trackingConfig);
 
+        //Get bounding box info
+        let _boundingBox = element.getBoundingClientRect()
+        let boundingBox = {
+            x: _boundingBox.x,
+            y: _boundingBox.y,
+            width: _boundingBox.width,
+            height: _boundingBox.height,
+            top: _boundingBox.top,
+            right: _boundingBox.right,
+            bottom: _boundingBox.bottom,
+            left: _boundingBox.left
+        }
+        packageObject.eventDetails.boundingBox = boundingBox
+
         Dispatcher.sendObject(packageObject);
     };
 
