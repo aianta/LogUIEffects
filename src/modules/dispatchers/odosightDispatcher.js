@@ -35,6 +35,7 @@ export default (function(root){
     var _isInIframe = false;
     var _windowConnection = null;
     var _libraryLoadTimestamp = null;  // The time at which the dispatcher loads -- for measuring the beginning of a session more accurately.
+    var _stats = {dispatched: 0, lastDispatchAt: null, errors: 0, lastError: null, sessionInfoAt: null}; //For diagnostics.
 
 
     _public.dispatcherType = 'odo-sight';
@@ -76,6 +77,7 @@ export default (function(root){
                         root.dispatchEvent(new Event('logUIShutdownRequest'))
                         break;
                     case "SESSION_INFO":
+                        _stats.sessionInfoAt = Date.now();
                         console.log(`got session info! ${JSON.stringify(event.data.sessionData,null,4)}`)
                         handleSessionConfig(event.data.sessionData)
                         break;
@@ -95,19 +97,33 @@ export default (function(root){
         return _isActive;
     } 
 
+    /**
+     * @returns what the dispatcher sent to OdoX's content script, for diagnostics.
+     */
+    _public.stats = function(){
+        return Object.assign({}, _stats);
+    }
+
     _public.sendObject = function(objectToSend){
         if(_isActive){
 
             Helpers.console(objectToSend, 'Dispatcher', false);
             
-            let data = JSON.parse(JSON.stringify(objectToSend))
+            try{
+                let data = JSON.parse(JSON.stringify(objectToSend))
 
-            window.postMessage({
-                origin: 'logui.bundle.js',
-                type: 'LOGUI_EVENT',
-                payload: data
-            })
-
+                window.postMessage({
+                    origin: 'logui.bundle.js',
+                    type: 'LOGUI_EVENT',
+                    payload: data
+                })
+                _stats.dispatched++;
+                _stats.lastDispatchAt = Date.now();
+            }catch(err){
+                _stats.errors++;
+                _stats.lastError = String(err && err.message ? err.message : err);
+                throw err;
+            }
             return;
 
         }else if (_isInIframe){

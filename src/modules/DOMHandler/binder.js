@@ -15,6 +15,7 @@ import EventCallbackHandler from '../eventCallbackHandler';
 
 export default (function(root) {
     var _public = {};
+    var _bound = 0; //How many elements have LogUI listeners, for diagnostics.
 
     _public.init = function() {
         for (let element of DOMHandlerHelpers.generators.uniqueElements()) {
@@ -26,16 +27,29 @@ export default (function(root) {
         for (let element of DOMHandlerHelpers.generators.uniqueElements()) {
             _public.unbind(element);
         }
+        _bound = 0;
+    };
+
+    /**
+     * @returns how many elements LogUI bound listeners to since it started, for diagnostics.
+     */
+    _public.boundCount = function() {
+        return _bound;
     };
 
     _public.bind = function(element) {
         let elementDOMProperties = Config.DOMProperties.get(element);
 
+        let events = 0;
         for (let eventName of elementDOMProperties.getEventList()) {
 
             element.addEventListener(eventName, EventCallbackHandler.logUIEventCallback, true);
+            events++;
 
             
+        }
+        if (events > 0) {
+            _bound++;
         }
     };
 

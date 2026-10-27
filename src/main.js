@@ -6,6 +6,8 @@ import MetadataHandler from './modules/metadataHandler';
 import SpecificFrameworkEvents from './modules/specificFrameworkEvents';
 import EventHandlerController from './modules/eventHandlerController';
 import TinyMCEHandler from './modules/tinyMCE'
+import Binder from './modules/DOMHandler/binder';
+import MutationObserverController from './modules/DOMHandler/mutationObserverController';
 
 export default (function(root) {
     var _public = {};
@@ -17,12 +19,34 @@ export default (function(root) {
 
     _public.Config = Config;
 
+    /* For diagnostics: when this bundle ran, and how its last init went. */
+    _public.loadedAt = Date.now();
+    var _initStartedAt = null;
+    var _initCompletedAt = null;
+    var _initError = null;
+    var _initErrorStack = null;
+
     root.addEventListener('message', handleWindowMessages)
 
     console.log(`Hello from LogUI inside ${root.location}!`)
 
     /* API calls */
     _public.init = async function(suppliedConfigObject) {
+        _initStartedAt = Date.now();
+        _initCompletedAt = null;
+        _initError = null;
+        _initErrorStack = null;
+        try {
+            await initialise(suppliedConfigObject);
+            _initCompletedAt = Date.now();
+        } catch (err) {
+            _initError = String(err && err.message ? err.message : err);
+            _initErrorStack = err && err.stack ? String(err.stack) : null;
+            throw err;
+        }
+    };
+
+    var initialise = async function(suppliedConfigObject) {
         root.addEventListener('logUIShutdownRequest', _public.stop);
 
         if (!suppliedConfigObject) {
@@ -140,6 +164,35 @@ export default (function(root) {
         return (
             Config.isActive() &&
             Dispatcher.isActive());
+    }
+
+    /**
+     * What OdoX's diagnostics report of LogUI: whether it runs, how its start went, how many elements it listens on,
+     * and what its dispatcher sent. Read-only.
+     */
+    _public.diagnostics = function() {
+        var stats = Dispatcher.stats ? Dispatcher.stats() : {};
+        var orNull = function(value) { return value === undefined ? null : value; };
+        return {
+            buildDate: _public.buildDate,
+            loadedAt: _public.loadedAt,
+            active: _public.isActive(),
+            configActive: Config.isActive(),
+            dispatcherActive: Dispatcher.isActive(),
+            initStartedAt: _initStartedAt,
+            initCompletedAt: _initCompletedAt,
+            initError: _initError,
+            initErrorStack: _initErrorStack,
+            elementAnomalies: DOMHandler.anomalies ? DOMHandler.anomalies() : null,
+            elementInitialisationError: DOMHandler.initialisationError ? DOMHandler.initialisationError() : null,
+            boundElements: Binder.boundCount ? Binder.boundCount() : null,
+            observing: MutationObserverController.isObserving ? MutationObserverController.isObserving() : null,
+            dispatched: orNull(stats.dispatched),
+            lastDispatchAt: orNull(stats.lastDispatchAt),
+            dispatchErrors: orNull(stats.errors),
+            lastError: orNull(stats.lastError),
+            sessionInfoAt: orNull(stats.sessionInfoAt),
+        };
     }
 
     _public.stop = async function() {

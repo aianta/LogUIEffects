@@ -33,13 +33,15 @@ export default (function(root) {
 
             getEventList: function*() {
                 for (let eventName in newDOMPropertiesObject['events']) {
-                    yield eventName;
+                    if (Object.prototype.hasOwnProperty.call(newDOMPropertiesObject['events'], eventName)) {
+                        yield eventName;
+                    }
                 }
             },
 
             deleteEventsWithGroup: function(groupName) {
                 for (let event in newDOMPropertiesObject['events']) {
-                    if (newDOMPropertiesObject.getEventGroupName(event) == groupName) {
+                    if (Object.prototype.hasOwnProperty.call(newDOMPropertiesObject['events'], event) && newDOMPropertiesObject.getEventGroupName(event) == groupName) {
                         newDOMPropertiesObject.deleteEvent(event);
                     }
                 }

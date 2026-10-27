@@ -19,12 +19,17 @@ export default (function(root) {
     
     _public.init = function() {
         for (let browserEventName in BrowserEvents) {
-            BrowserEvents[browserEventName].init();
+            if (Object.prototype.hasOwnProperty.call(BrowserEvents, browserEventName)) {
+                BrowserEvents[browserEventName].init();
+            }
         }
     }
 
     _public.stop = function() {
         for (let browserEventName in BrowserEvents) {
+            if (!Object.prototype.hasOwnProperty.call(BrowserEvents, browserEventName)) {
+                continue;
+            }
             let browserEvent = BrowserEvents[browserEventName];
 
             if (browserEvent.hasOwnProperty('stop')) {

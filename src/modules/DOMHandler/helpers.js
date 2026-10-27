@@ -24,6 +24,10 @@ export default (function(root) {
             let trackingConfig = Config.elementTrackingConfig.get();
 
             for (let groupName in trackingConfig) {
+                if (!Object.prototype.hasOwnProperty.call(trackingConfig, groupName)) {
+                    continue;
+                }
+
                 let groupObject = {
                     name: groupName,
                     selector: trackingConfig[groupName].selector,
@@ -59,6 +63,11 @@ export default (function(root) {
     };
 
     _public.processElement = function(element, groupObject) {
+        //Only elements carry listeners; anything else (e.g. undefined from a stray key) is skipped.
+        if (!(element instanceof root.Element)) {
+            return;
+        }
+
         if (Config.DOMProperties.has(element)) {
             let DOMProperties = Config.DOMProperties.get(element);
 

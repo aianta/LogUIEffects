@@ -17,7 +17,9 @@ export default (function(root) {
 
     _public.init = function() {
         for (let sourcer in Sourcers) {
-            Sourcers[sourcer].init();
+            if (Object.prototype.hasOwnProperty.call(Sourcers, sourcer)) {
+                Sourcers[sourcer].init();
+            }
         }
 
         return true;
@@ -25,6 +27,9 @@ export default (function(root) {
 
     _public.stop = function() {
         for (let sourcerName in Sourcers) {
+            if (!Object.prototype.hasOwnProperty.call(Sourcers, sourcerName)) {
+                continue;
+            }
             let sourcer = Sourcers[sourcerName];
 
             if (sourcer.hasOwnProperty('stop')) {
@@ -71,7 +76,7 @@ export default (function(root) {
 
     var getSourcer = function(requestedSourcerName) {
         for (let sourcerName in Sourcers) {
-            if (sourcerName == requestedSourcerName) {
+            if (Object.prototype.hasOwnProperty.call(Sourcers, sourcerName) && sourcerName == requestedSourcerName) {
                 return Sourcers[sourcerName];
             }
         }

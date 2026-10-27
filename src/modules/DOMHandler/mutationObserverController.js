@@ -35,6 +35,13 @@ export default (function(root) {
         _mutationObserver = null;
     };
 
+    /**
+     * @returns whether LogUI watches the page for new elements to bind, for diagnostics.
+     */
+    _public.isObserving = function() {
+        return _mutationObserver !== null;
+    };
+
     var observerCallback = function(mutationsList) {
         for (let record of mutationsList) {
             if (record.type == 'childList') {

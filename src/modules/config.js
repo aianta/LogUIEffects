@@ -90,6 +90,10 @@ export default (function(root) {
         },
 
         set: function(element, properties) {
+            //A WeakMap key must be an object; anything else would throw and stop whoever called.
+            if (element === null || (typeof element !== 'object' && typeof element !== 'function')) {
+                return;
+            }
             _DOMProperties.set(element, properties);
         },
 
@@ -132,8 +136,9 @@ export default (function(root) {
 
         removeRule: function(selectorString, propertiesString) {
             if (_styleElement) {
-                for (let i in _styleElement.sheet.cssRules) {
-                    let styleElement = _styleElement.sheet.cssRules[i];
+                let cssRules = _styleElement.sheet.cssRules;
+                for (let i = 0; i < cssRules.length; i++) {
+                    let styleElement = cssRules[i];
     
                     if (styleElement.cssText == `${selectorString} \{ ${propertiesString} \}`) {
                         _styleElement.sheet.removeRule(i);

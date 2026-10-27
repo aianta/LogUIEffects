@@ -18,7 +18,7 @@ export default (function(root) {
 
     _public.init = function() {
         for (let eventHandler in ImportedEventHandlers) {
-            if (ImportedEventHandlers[eventHandler].hasOwnProperty('init')) {
+            if (Object.prototype.hasOwnProperty.call(ImportedEventHandlers, eventHandler) && ImportedEventHandlers[eventHandler].hasOwnProperty('init')) {
                 ImportedEventHandlers[eventHandler].init();
             }
         }
@@ -28,7 +28,7 @@ export default (function(root) {
 
     _public.stop = function() {
         for (let eventHandler in ImportedEventHandlers) {
-            if (ImportedEventHandlers[eventHandler].hasOwnProperty('stop')) {
+            if (Object.prototype.hasOwnProperty.call(ImportedEventHandlers, eventHandler) && ImportedEventHandlers[eventHandler].hasOwnProperty('stop')) {
                 ImportedEventHandlers[eventHandler].stop();
             }
         }
